@@ -158,8 +158,8 @@
 
             controlTimeout = setTimeout(() => {
                 controls.classList.remove('active');
-                controls.style.opacity = '0'; // Fade out
-            }, 2000); // Fade out after 2 seconds of inactivity
+                controls.style.opacity = '0';
+            }, 1000);
         }
 
         function seek(event) {
@@ -169,17 +169,15 @@
             video.currentTime = percentage * video.duration;
         }
 
-        // Show controls when mouse moves or key is pressed
         document.addEventListener('mousemove', resetControlTimeout);
         document.addEventListener('keydown', function(event) {
             resetControlTimeout();
             if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault(); // Prevent scrolling when space is pressed
+                event.preventDefault();
                 togglePlay();
             }
         });
 
-        // Initial setup to hide controls after inactivity
         resetControlTimeout();
     </script>
 </body>
