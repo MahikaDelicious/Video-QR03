@@ -39,6 +39,7 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0);
             z-index: 2;
+            cursor: pointer;
         }
         .controls {
             position: absolute;
@@ -89,7 +90,7 @@
         <video id="video" autoplay>
             <source src="Tribute to Anne❤️.mp4" type="video/mp4">
         </video>
-        <div class="overlay" onclick="removeOverlay()"></div>
+        <div class="overlay" onclick="togglePlay()"></div>
         <div class="controls" id="controls">
             <button class="control-button" onclick="togglePlay()">
                 <i id="playIcon" class="fas fa-play"></i>
