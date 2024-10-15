@@ -231,13 +231,8 @@
             if (event.key === 'F12') {
                 event.preventDefault();
             }
-        });
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'u' || e.key === 's')) {
-                e.preventDefault();
+            if ((event.ctrlKey || event.metaKey) && (event.key === 'c' || event.key === 'u' || event.key === 's')) {
+                event.preventDefault();
             }
         });
 </script>
