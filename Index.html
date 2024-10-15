@@ -71,11 +71,24 @@
             border-radius: 5px;
             overflow: hidden;
             cursor: pointer; 
+            position: relative;
         }
         .progress {
             height: 100%;
             background: green;
             width: 0;
+            position: relative;
+        }
+        .slider-thumb {
+            position: absolute;
+            top: -5px; /* Center it vertically */
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 3;
         }
         .time-display {
             color: white;
@@ -101,6 +114,7 @@
             </button>
             <div class="progress-container" id="progressContainer" onclick="seek(event)">
                 <div class="progress" id="progress"></div>
+                <div class="slider-thumb" id="sliderThumb"></div>
             </div>
             <div class="time-display" id="timeDisplay">00:00 / 00:00</div>
         </div>
@@ -116,8 +130,19 @@
         const timeDisplay = document.getElementById('timeDisplay');
         const playIcon = document.getElementById('playIcon');
         const muteIcon = document.getElementById('muteIcon');
+        const sliderThumb = document.getElementById('sliderThumb');
         const controls = document.getElementById('controls');
         let controlTimeout;
+
+        // Update the progress and slider position
+        video.addEventListener('timeupdate', function() {
+            const currentTime = formatTime(video.currentTime);
+            const duration = formatTime(video.duration);
+            timeDisplay.textContent = `${currentTime} / ${duration}`;
+            const progressPercentage = (video.currentTime / video.duration) * 100;
+            progress.style.width = `${progressPercentage}%`;
+            sliderThumb.style.left = `${progressPercentage}%`;
+        });
 
         function togglePlay() {
             if (video.paused) {
@@ -139,13 +164,36 @@
             resetControlTimeout();
         }
 
-        video.addEventListener('timeupdate', function() {
-            const currentTime = formatTime(video.currentTime);
-            const duration = formatTime(video.duration);
-            timeDisplay.textContent = `${currentTime} / ${duration}`;
-            const progressPercentage = (video.currentTime / video.duration) * 100;
-            progress.style.width = `${progressPercentage}%`;
+        function seek(event) {
+            const rect = progress.parentElement.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left;
+            const percentage = offsetX / rect.width;
+            video.currentTime = percentage * video.duration;
+        }
+
+        // Drag functionality for slider
+        let isDragging = false;
+
+        sliderThumb.addEventListener('mousedown', function() {
+            isDragging = true;
         });
+
+        document.addEventListener('mousemove', function(event) {
+            if (isDragging) {
+                const rect = progress.parentElement.getBoundingClientRect();
+                const offsetX = event.clientX - rect.left;
+                const percentage = Math.min(Math.max(0, offsetX / rect.width), 1);
+                video.currentTime = percentage * video.duration;
+                progress.style.width = `${percentage * 100}%`;
+                sliderThumb.style.left = `${percentage * 100}%`;
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        video.addEventListener('click', togglePlay);
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
@@ -164,13 +212,6 @@
             }, 1000);
         }
 
-        function seek(event) {
-            const rect = progress.parentElement.getBoundingClientRect();
-            const offsetX = event.clientX - rect.left;
-            const percentage = offsetX / rect.width;
-            video.currentTime = percentage * video.duration;
-        }
-
         document.addEventListener('mousemove', resetControlTimeout);
         document.addEventListener('keydown', function(event) {
             resetControlTimeout();
@@ -181,6 +222,17 @@
         });
 
         resetControlTimeout();
+        
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
+                e.preventDefault();
+            }
+        });
+
     </script>
 </body>
 </html>
