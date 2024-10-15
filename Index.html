@@ -101,7 +101,7 @@
 </head>
 <body>
     <div class="video-container">
-        <video id="video" autoplay>
+        <video id="video" autoplay controlsList="nodownload">
             <source src="Tribute to Anne❤️.mp4" type="video/mp4">
         </video>
         <div class="overlay" onclick="togglePlay()"></div>
@@ -222,17 +222,6 @@
         });
 
         resetControlTimeout();
-        
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
-                e.preventDefault();
-            }
-        });
-
     </script>
 </body>
 </html>
