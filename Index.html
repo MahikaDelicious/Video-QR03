@@ -52,7 +52,7 @@
             align-items: center;
             gap: 10px;
             width: 90%;
-            opacity: 0;
+            opacity: 1; /* Make controls always visible */
             transition: opacity 0.5s ease;
         }
         .control-button {
@@ -94,14 +94,11 @@
             color: white;
             margin-left: 10px;
         }
-        .controls.active {
-            opacity: 1;
-        }
     </style>
 </head>
 <body>
     <div class="video-container">
-        <video id="video" autoplay>
+        <video id="video" autoplay controls>
             <source src="Tribute to Anne❤️.mp4" type="video/mp4">
         </video>
         <div class="overlay" onclick="togglePlay()"></div>
@@ -127,7 +124,6 @@
         const playIcon = document.getElementById('playIcon');
         const muteIcon = document.getElementById('muteIcon');
         const sliderThumb = document.getElementById('sliderThumb');
-        const controls = document.getElementById('controls');
         let isDragging = false;
 
         video.addEventListener('timeupdate', updateProgress);
