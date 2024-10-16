@@ -14,23 +14,23 @@
             align-items: center;
             height: 100vh;
             background-color: black;
-            overflow: hidden; 
+            overflow: hidden;
         }
         .video-container {
             position: relative;
             width: 100%;
-            height: 100vh; 
-            overflow: hidden; 
+            height: 100vh;
+            overflow: hidden;
         }
         video {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 100vh; 
+            height: 100vh;
             transform: translate(-50%, -50%);
             border: none;
-            z-index: 1; 
+            z-index: 1;
         }
         .overlay {
             position: absolute;
@@ -44,16 +44,16 @@
         }
         .controls {
             position: absolute;
-            bottom: 20px; 
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 3;
             display: flex;
-            align-items: center; 
-            gap: 10px; 
-            width: 90%; 
-            opacity: 0; 
-            transition: opacity 0.5s ease; 
+            align-items: center;
+            gap: 10px;
+            width: 90%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
         .control-button {
             padding: 5px;
@@ -62,15 +62,15 @@
             color: black;
             cursor: pointer;
             border-radius: 5px;
-            font-size: 20px; 
+            font-size: 20px;
         }
         .progress-container {
-            flex-grow: 1; 
+            flex-grow: 1;
             height: 10px;
             background: rgba(255, 255, 255, 0.5);
             border-radius: 5px;
             overflow: hidden;
-            cursor: pointer; 
+            cursor: pointer;
             position: relative;
         }
         .progress {
@@ -81,7 +81,7 @@
         }
         .slider-thumb {
             position: absolute;
-            top: -5px; /* Center it vertically */
+            top: -5px;
             width: 20px;
             height: 20px;
             background: white;
@@ -92,10 +92,10 @@
         }
         .time-display {
             color: white;
-            margin-left: 10px; 
+            margin-left: 10px;
         }
         .controls.active {
-            opacity: 1; 
+            opacity: 1;
         }
     </style>
 </head>
@@ -121,10 +121,6 @@
     </div>
 
     <script>
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-
         const video = document.getElementById('video');
         const progress = document.getElementById('progress');
         const timeDisplay = document.getElementById('timeDisplay');
@@ -132,17 +128,20 @@
         const muteIcon = document.getElementById('muteIcon');
         const sliderThumb = document.getElementById('sliderThumb');
         const controls = document.getElementById('controls');
-        let controlTimeout;
+        let isDragging = false;
 
-        // Update the progress and slider position
-        video.addEventListener('timeupdate', function() {
-            const currentTime = formatTime(video.currentTime);
-            const duration = formatTime(video.duration);
-            timeDisplay.textContent = `${currentTime} / ${duration}`;
-            const progressPercentage = (video.currentTime / video.duration) * 100;
-            progress.style.width = `${progressPercentage}%`;
-            sliderThumb.style.left = `${progressPercentage}%`;
-        });
+        video.addEventListener('timeupdate', updateProgress);
+
+        function updateProgress() {
+            if (!isDragging) {
+                const progressPercentage = (video.currentTime / video.duration) * 100;
+                progress.style.width = `${progressPercentage}%`;
+                sliderThumb.style.left = `${progressPercentage}%`;
+                const currentTime = formatTime(video.currentTime);
+                const duration = formatTime(video.duration);
+                timeDisplay.textContent = `${currentTime} / ${duration}`;
+            }
+        }
 
         function togglePlay() {
             if (video.paused) {
@@ -154,14 +153,12 @@
                 playIcon.classList.remove('fa-pause');
                 playIcon.classList.add('fa-play');
             }
-            resetControlTimeout();
         }
 
         function toggleMute() {
             video.muted = !video.muted;
             muteIcon.classList.toggle('fa-volume-up', !video.muted);
             muteIcon.classList.toggle('fa-volume-mute', video.muted);
-            resetControlTimeout();
         }
 
         function seek(event) {
@@ -170,9 +167,6 @@
             const percentage = offsetX / rect.width;
             video.currentTime = percentage * video.duration;
         }
-
-        // Drag functionality for slider
-        let isDragging = false;
 
         sliderThumb.addEventListener('mousedown', function() {
             isDragging = true;
@@ -183,60 +177,26 @@
                 const rect = progress.parentElement.getBoundingClientRect();
                 const offsetX = event.clientX - rect.left;
                 const percentage = Math.min(Math.max(0, offsetX / rect.width), 1);
-                video.currentTime = percentage * video.duration;
                 progress.style.width = `${percentage * 100}%`;
                 sliderThumb.style.left = `${percentage * 100}%`;
             }
         });
 
         document.addEventListener('mouseup', function() {
-            isDragging = false;
+            if (isDragging) {
+                const rect = progress.parentElement.getBoundingClientRect();
+                const offsetX = event.clientX - rect.left;
+                const percentage = Math.min(Math.max(0, offsetX / rect.width), 1);
+                video.currentTime = percentage * video.duration;
+                isDragging = false;
+            }
         });
-
-        video.addEventListener('click', togglePlay);
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
-
-        function resetControlTimeout() {
-            clearTimeout(controlTimeout);
-            controls.classList.add('active');
-            controls.style.opacity = '1'; 
-
-            controlTimeout = setTimeout(() => {
-                controls.classList.remove('active');
-                controls.style.opacity = '0';
-            }, 1000);
-        }
-
-        document.addEventListener('mousemove', resetControlTimeout);
-        document.addEventListener('keydown', function(event) {
-            resetControlTimeout();
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                togglePlay();
-            }
-        });
-
-        resetControlTimeout();
-        
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-        
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'F12') {
-                event.preventDefault();
-            }
-            if ((event.ctrlKey || event.metaKey) && (event.key === 'c' || event.key === 'u' || event.key === 's')) {
-                event.preventDefault();
-            }
-        });
-</script>
-
+    </script>
 </body>
 </html>
-    
